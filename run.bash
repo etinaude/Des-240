@@ -1,0 +1,1 @@
+processing-java --sketch=a1 --run

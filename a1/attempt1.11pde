@@ -1,0 +1,167 @@
+/**
+  Des 240 Assignment 1, showing data through geometric primitives
+
+
+  by Etienne Naude, 2021
+*/
+
+// set up constants
+final int WIDTH = 1200;
+final int HEIGHT = 900;
+
+final int SIZE = 15;
+final float Y_SIZE = SIZE*1.1;
+final float X_SIZE = SIZE*0.9;
+
+final int X_MAX = int(WIDTH/(SIZE));
+final int Y_MAX = int(HEIGHT/(SIZE));
+
+// set up the grid variables
+int[][] grid = new int[X_MAX + 1][Y_MAX + 1];
+int[][] gridCount = new int[X_MAX + 1][Y_MAX + 1];
+
+
+void setup() {
+  size(1000, 1000);
+  stroke(255);
+  frameRate(2);
+  for (int x = 0; x<X_MAX + 1; x++) {
+    for (int y = 0; y<Y_MAX + 1; y++) {
+      grid[x][y] = 100;
+    }
+  }
+
+  for (int i = 0; i < startData.initalArray.length; ++i) {
+
+    int[] s = startData.initalArray[i];
+    int cell_x = s[0];
+    int cell_y = s[1];
+    grid[cell_x][cell_y] = 1;
+  }
+}
+
+
+void draw() {
+
+  // counts the neighours of all cells
+  for (int x = 0; x < X_MAX ; x++) {
+    for (int y = 0; y < Y_MAX; y++) {
+      gridCount[x][y] = countNeighbours(x,y);
+    }
+  }
+
+
+  // toggles and renders every cell
+  for (int x = 0; x < X_MAX ; x++) {
+    for (int y = 0; y < Y_MAX; y++) {
+
+        // default colour
+        fill(200);
+        strokeWeight(2);
+        stroke(100);
+
+        // if cell is alive or ocean change the color
+        if(grid[x][y] == 1){fill(100);}
+        if(grid[x][y] == 100){fill(200); noStroke();}
+
+        // draw hexagons (change location based on even/odd)
+        if(x%2 ==0)drawHexagon(X_SIZE*x, Y_SIZE*y+Y_SIZE/2, SIZE*0.64);
+        else drawHexagon(X_SIZE*x, Y_SIZE*y, SIZE*0.64);
+
+        grid[x][y] = cellToggle(x, y);
+    }
+  }
+}
+
+
+/**
+  draws hexagons with a given size in a given position
+
+  @see https://processing.org/examples/regularpolygon.html
+
+  @param  x  x-position
+  @param  y  y-position
+  @param  radius radius of the hexagon
+*/
+void drawHexagon(float x, float y, float radius) {
+  pushMatrix();
+  float angle = TWO_PI / 6;
+  beginShape();
+  for (float a = 0; a < TWO_PI; a += angle) {
+    float sx = x + cos(a) * radius;
+    float sy = y + sin(a) * radius;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
+  popMatrix();
+}
+
+/**
+  counts the number of "live" cells adject to a cell
+
+  @param  x  the x coordinate of the cell
+  @param  y  the y coordinate of the cell
+ */
+int countNeighbours(int x, int y){
+  int count = 0;
+  if(grid[x][y] == 100) return 100;
+  int x_small = x == 0? X_MAX : x - 1;
+  int x_large = x == X_MAX? 0 : x + 1;
+  int y_small = y == 0? Y_MAX : y - 1;
+  int y_large = y == Y_MAX? 0 : y + 1;
+
+  if(x *  SIZE == X_MAX){
+    print("X MAX");
+  }
+
+   if(y * SIZE == Y_MAX){
+    print("Y MAX");
+  }
+
+  count += grid[x][y_large];
+  count += grid[x][y_small];
+
+  count += grid[x_small][y];
+  count += grid[x_small][y_large];
+
+  while (count >= 100) {
+    count -= 100;
+  }
+
+  if(x%2 ==0){
+    count += grid[x_large][y_large];
+    count += grid[x_large][y_large];
+  }else{
+    count += grid[x_large][y_small];
+    count += grid[x_large][y_small];
+  }
+
+  if(x == 2){
+    print(count);
+  }
+
+  return count;
+}
+
+/**
+ toggles the state of a cell if it macthes the automata rules
+
+ @param  x  the x coordinate of the cell
+ @param  y  the y coordinate of the cell
+*/
+int cellToggle(int x, int y){
+  if(grid[x][y] == 100) return 100;
+  if(grid[x][y] == 1){
+    if(gridCount[x][y] == 1  || gridCount[x][y] == 2 || gridCount[x][y] == 3 || gridCount[x][y] == 4){
+      return 1;
+    } else{
+      return 0;
+    }
+  }else{
+    if(gridCount[x][y] == 1  || gridCount[x][y] == 3 || gridCount[x][y] == 4 || gridCount[x][y] == 5){
+      return 1;
+    } else{
+      return 0;
+    }
+  }
+}
