@@ -1,5 +1,18 @@
-static class startData {
- static int[][] initalArray = {
+class Cell {
+  int x;
+  int y;
+
+  Cell(int in_x, int in_y) {
+     x = in_x;
+     y = in_y;
+  }
+
+}
+
+class startData {
+ ArrayList<ArrayList<Integer>> initalArray = new ArrayList<ArrayList<Integer>>();
+
+ int[][] init = {
   {30,6},
   {31,7},
   {32,7},
@@ -380,5 +393,25 @@ static class startData {
 
 
 
+
+
+
+
+
+
+
+ //
+
+ startData(){
+    for (int[] point : init) {
+       ArrayList<Integer> intList = new ArrayList<Integer>(2);
+       for (int i : point)
+       {
+           intList.add(i);
+       }
+
+       initalArray.add(intList);
+    }
+ }
 
 }
