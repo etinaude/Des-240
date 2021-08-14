@@ -3,6 +3,12 @@
 
 
   by Etienne Naude, 2021
+
+  showing fertility rate of New Zealand - 1.71 bpw.
+  http://www.stats.govt.nz/statistics/geos/geos-datasets/fertility-rate-nz/
+
+  7.09
+  12.37
 */
 
 // set up constants
@@ -59,7 +65,11 @@ void draw() {
   }
 
 
-  liveCells.remove(int(random(liveCells.size())));
+  int population = liveCells.size();
+
+  for(int deaths = 0; deaths < int(population*0.145); deaths++) {
+      liveCells.remove(int(random(liveCells.size())));
+  }
   print(liveCells.size());
 
   // toggles and renders every cell
