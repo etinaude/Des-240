@@ -28,3 +28,10 @@ void mouseClicked() {
     fill(150);
     text("("+ int(currentPosition[0]) + "," + int(currentPosition[1]) +")", currentPosition[0] + 10, currentPosition[1] + 10);
 }
+
+void keyPressed() {
+    if ( key == ' ' )  {
+        background(200);
+        particles = new ArrayList<float[]>();
+    }
+}
