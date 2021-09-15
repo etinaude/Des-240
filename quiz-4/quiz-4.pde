@@ -5,10 +5,17 @@ void setup() {
 }
 
 void draw() {
-  for(int x = 50; x< 600; x += 50){
-      for(int y = 20; y< 600; y += 50){
-         fill(random(0, 255));
-          circle(y, x, y/14 + 10);
+  // loop for each column
+  for(int y = 50; y< 600; y += 50){
+
+    //loop for each row
+    for(int x = 20; x< 600; x += 50){
+
+      // Pick and random greyscale colour
+      fill(random(0, 255));
+
+      // Draw circle using X to influence its size
+      circle(x, y, x/14 + 10);
     }
   }
 }
