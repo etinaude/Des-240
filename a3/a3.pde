@@ -1,12 +1,14 @@
 ArrayList<BluePrint> bluePrints = new ArrayList<BluePrint>();
 ArrayList<Building> currentBuildings = new ArrayList<Building>();
 
-int gridSize = 50;
-int sidebarWidth = 200;
-int topWidth = 100;
-int selectedBlueprint = -1;
-int score = 0;
+final int CELL_SIZE = 150;
+final int GRID_SIZE = CELL_SIZE * 5;
 
+final int SIDE_WIDTH = 200;
+final int TOP_HEIGHT = 100;
+
+int selectedBlueprint = -1;
+int score= 0;
 
 class BluePrint {
     int optionIndex;
@@ -30,7 +32,7 @@ class BluePrint {
             // draw option
         fill(c);
         noStroke();
-        square(50, 50 + (10+ gridSize) * optionIndex , gridSize);
+        square(50, 50 + (10+ CELL_SIZE) * optionIndex , CELL_SIZE);
     }
 }
 
@@ -47,7 +49,7 @@ class Building implements Comparable<Building>{
     public void draw() {
         fill(bluePrints.get(optionIndex).c);
         noStroke();
-        square(position.x, position.y, gridSize);
+        square(position.x, position.y, CELL_SIZE);
 
     }
 
@@ -78,13 +80,13 @@ void draw() {
     drawBackground();
 
     // if(buildings.size() == 0) return;
-    for(BluePrint b : bluePrints) {
-        b.draw();
-    }
+    // for(BluePrint b : bluePrints) {
+    //     b.draw();
+    // }
 
-    for(Building b : currentBuildings) {
-        b.draw();
-    }
+    // for(Building b : currentBuildings) {
+    //     b.draw();
+    // }
 
     // draw stats
 
@@ -106,17 +108,24 @@ void drawBackground(){
 
     strokeWeight(1);
     stroke(100);
-    for (int x = sidebarWidth; x < width; x += gridSize) {
-        for (int y = topWidth; y < height; y += gridSize) {
-            line(x, topWidth, x, height);
-            line(sidebarWidth, y, width, y);
-        }
+
+
+    int y1 = TOP_HEIGHT;
+    int y2 = TOP_HEIGHT + GRID_SIZE;
+
+    clip(SIDE_WIDTH, TOP_HEIGHT, GRID_SIZE, GRID_SIZE);
+    for(int i = 0; i < GRID_SIZE * 3; i += CELL_SIZE) {
+        int x1 = SIDE_WIDTH - 2 * GRID_SIZE + i;
+        int x2 = SIDE_WIDTH + i;
+        line(x1, y1,  x2 , y2);
+        line(x2, y1,  x1 , y2);
     }
+
 }
 
 void drawButtons(){
     fill(230);
-    rect(0, height - 60, sidebarWidth, 60);
+    rect(0, height - 60, SIDE_WIDTH, 60);
     fill(0);
     textSize(20);
     text("DELETE", 60, height - 30);
@@ -125,11 +134,11 @@ void drawButtons(){
 
 void mouseClicked() {
     PVector currentPosition = new PVector(mouseX, mouseY);
-    if (mouseX < sidebarWidth) {
+    if (mouseX < SIDE_WIDTH) {
         //in options column
-        if(currentPosition.x > 50 && currentPosition.x < 50 + gridSize){
+        if(currentPosition.x > 50 && currentPosition.x < 50 + CELL_SIZE){
 
-            float index = (currentPosition.y-50)/(10+ gridSize);
+            float index = (currentPosition.y-50)/(10+ CELL_SIZE);
             if(index >= 0 && index < bluePrints.size()){
                 selectedBlueprint = (int)index;
             }
@@ -144,8 +153,8 @@ void mouseClicked() {
         return;
     }
 
-    currentPosition.x = currentPosition.x -  currentPosition.x % gridSize;
-    currentPosition.y = currentPosition.y -  currentPosition.y % gridSize;
+    currentPosition.x = currentPosition.x -  currentPosition.x % CELL_SIZE;
+    currentPosition.y = currentPosition.y -  currentPosition.y % CELL_SIZE;
 
     if(selectedBlueprint == -1) {
         // delete building
