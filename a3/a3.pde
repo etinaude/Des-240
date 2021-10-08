@@ -10,21 +10,11 @@ final int TOP_HEIGHT = 100;
 int selectedBlueprint = -1;
 int score = 0;
 
-PImage img;
-
-
 class BluePrint {
     int optionIndex;
     PImage img;
     color c;
     String name;
-
-    // BluePrint(PImage img, int optionIndex, String name) {
-    //     this.img = img;
-    //     this.optionIndex = optionIndex;
-    //     this.name = name;
-    // }
-
     BluePrint(color c, int optionIndex, String name) {
         this.c = c;
         this.optionIndex = optionIndex;
@@ -38,11 +28,8 @@ class BluePrint {
     }
 
     public void  draw(){
-            // draw option
-        // fill(c);
-        // noStroke();
         image(img, 50, 50 + (10+ CELL_SIZE) * optionIndex, CELL_SIZE, CELL_SIZE/2);
-        // square(50, 50 + (10+ CELL_SIZE) * optionIndex , CELL_SIZE);
+        print("DRAW BLUE PRINT \n");
     }
 }
 
@@ -57,10 +44,8 @@ class Building implements Comparable<Building>{
     }
 
     public void draw() {
-        // fill(bluePrints.get(optionIndex).c);
-        // noStroke();
-        // square(position.x, position.y, CELL_SIZE);
         image(bluePrints.get(optionIndex).img, position.x, position.y, CELL_SIZE, CELL_SIZE/2);
+        print("DRAW BUILDING \n");
     }
 
     public int	compareTo(Building other) {
@@ -69,55 +54,34 @@ class Building implements Comparable<Building>{
 
 }
 
-
-
 void setup() {
     size(1000, 1000);
-    background(200);
     frameRate(20);
-    textSize(10);
-    strokeWeight(1);
     bluePrints.add(new BluePrint("./assets/base.png", 0, "Hospital"));
     bluePrints.add(new BluePrint("./assets/base.png", 1, "House"));
     bluePrints.add(new BluePrint("./assets/base.png", 2, "School"));
     bluePrints.add(new BluePrint("./assets/base.png", 3, "University"));
     bluePrints.add(new BluePrint("./assets/base.png", 4, "Drug Den"));
 
-    drawBackground();
+    refreshGrid();
+
     img = loadImage("./assets/base.png");
 }
 
 void draw() {
-    // background(200);
-    // drawBackground();
 
-    if(currentBuildings.size() == 0) return;
-    for(BluePrint b : bluePrints) {
-        b.draw();
-    }
-
-    for(Building b : currentBuildings) {
-        b.draw();
-    }
-
-    // draw stats
-
-    fill(0);
-    textSize(20);
-    text("Score: " + score, width - 400, 20);
-    text("Buildings: " + currentBuildings.size(), width - 400, 50);
-    textSize(20);
-
-    if(selectedBlueprint != -1) {
-        text("Selected Building: " + bluePrints.get(selectedBlueprint).name , width - 400, 80);
-    }
-
-    drawButtons();
 }
 
-void drawBackground(){
-    // background(200);
+void drawButtons(){
+    fill(230);
+    rect(0, height - 60, SIDE_WIDTH, 60);
+    fill(0);
+    textSize(20);
+    text("DELETE", 60, height - 30);
+}
 
+void refreshGrid(){
+    background(200);
     strokeWeight(1);
     stroke(100);
 
@@ -132,15 +96,30 @@ void drawBackground(){
         line(x1, y1,  x2 , y2);
         line(x2, y1,  x1 , y2);
     }
+    noClip();
 
+    for(BluePrint b : bluePrints) {
+        b.draw();
+    }
+
+    for(Building b : currentBuildings) {
+        b.draw();
+    }
+
+    drawButtons();
+    drawStats();
 }
 
-void drawButtons(){
-    fill(230);
-    rect(0, height - 60, SIDE_WIDTH, 60);
+
+void drawStats(){
     fill(0);
     textSize(20);
-    text("DELETE", 60, height - 30);
+    text("Score: " + score, width - 400, 20);
+    text("Buildings: " + currentBuildings.size(), width - 400, 50);
+
+    if(selectedBlueprint != -1) {
+        text("Selected Building: " + bluePrints.get(selectedBlueprint).name , width - 400, 80);
+    }
 }
 
 
@@ -151,8 +130,6 @@ void mouseClicked() {
     final int Y1 = TOP_HEIGHT;
     final int Y2 = TOP_HEIGHT + GRID_SIZE;
 
-
-
     if (MOUSE.x < SIDE_WIDTH) {
         //in options column
         if(MOUSE.x > 50 && MOUSE.x < 50 + CELL_SIZE){
@@ -162,47 +139,47 @@ void mouseClicked() {
                 selectedBlueprint = (int)index;
             }
         }
-
         // if clicked button
         if(MOUSE.y > height - 60){
                 // delete
                 selectedBlueprint = -1;
         }
 
+        refreshGrid();
         return;
     }
-
-
-
 
     PVector[] gridLineB = new PVector[2];
     PVector[] gridLineA = new PVector[2];
 
-
+    // Find cell
     for(int i = 0; i < GRID_SIZE * 3 ; i += CELL_SIZE) {
         final int X1 = SIDE_WIDTH - 2 * GRID_SIZE + i;
         final int X2 = SIDE_WIDTH + i;
 
+        // increasing lines
         PVector lineA1 = new PVector(X2, Y1);
         PVector lineA2 = new PVector(X1, Y2);
 
+        // decreasing lines
         PVector lineB1 = new PVector(X1, Y1);
         PVector lineB2 = new PVector(X2, Y2);
 
+        // find last line above cell
         if(findIntersection(V1, V2, lineA1, lineA2).y < MOUSE.y){
             gridLineA[0] = lineA1;
             gridLineA[1] = lineA2;
-
         }
 
+        // find last line below cell
         if(findIntersection(V1, V2, lineB2, lineB1).y > MOUSE.y){
             gridLineB[0] = lineB1;
             gridLineB[1] = lineB2;
         }
     }
 
-
     // left corner of cell
+    // using the intersection of the grid lines
     PVector pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
 
     // center of cell to the top left
@@ -214,26 +191,29 @@ void mouseClicked() {
             if(b.position.x == pointA.x && b.position.y == pointA.y) {
                 currentBuildings.remove(b);
                 score += 1;
-                return;
+                break;
             }
         }
+        refreshGrid();
         return;
     }
-
-
 
     // add building if not already there
     boolean found = false;
     for(Building b : currentBuildings) {
         if(b.position.x == pointA.x && b.position.y == pointA.y) {
             found = true;
-            return;
+            break;
         }
     }
 
+    if(!found){
+        currentBuildings.add(new Building(selectedBlueprint, pointA));
+        currentBuildings.sort(null);
+        refreshGrid();
+    }
 
-    currentBuildings.add(new Building(selectedBlueprint, pointA));
-    currentBuildings.sort(null);
+
 }
 
 
