@@ -8,7 +8,10 @@ final int SIDE_WIDTH = 200;
 final int TOP_HEIGHT = 100;
 
 int selectedBlueprint = -1;
-int score= 0;
+int score = 0;
+
+PImage img;
+
 
 class BluePrint {
     int optionIndex;
@@ -28,11 +31,18 @@ class BluePrint {
         this.name = name;
     }
 
+    BluePrint(String img, int optionIndex, String name) {
+        this.img = loadImage(img);
+        this.optionIndex = optionIndex;
+        this.name = name;
+    }
+
     public void  draw(){
             // draw option
-        fill(c);
-        noStroke();
-        square(50, 50 + (10+ CELL_SIZE) * optionIndex , CELL_SIZE);
+        // fill(c);
+        // noStroke();
+        image(img, 50, 50 + (10+ CELL_SIZE) * optionIndex, CELL_SIZE, CELL_SIZE/2);
+        // square(50, 50 + (10+ CELL_SIZE) * optionIndex , CELL_SIZE);
     }
 }
 
@@ -47,10 +57,10 @@ class Building implements Comparable<Building>{
     }
 
     public void draw() {
-        fill(bluePrints.get(optionIndex).c);
-        noStroke();
-        square(position.x, position.y, CELL_SIZE);
-
+        // fill(bluePrints.get(optionIndex).c);
+        // noStroke();
+        // square(position.x, position.y, CELL_SIZE);
+        image(bluePrints.get(optionIndex).img, position.x, position.y, CELL_SIZE, CELL_SIZE/2);
     }
 
     public int	compareTo(Building other) {
@@ -67,27 +77,28 @@ void setup() {
     frameRate(20);
     textSize(10);
     strokeWeight(1);
-    bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 0, "Hospital"));
-    bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 1, "House"));
-    bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 2, "School"));
-    bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 3, "University"));
-    bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 4, "Drug Den"));
+    bluePrints.add(new BluePrint("./assets/base.png", 0, "Hospital"));
+    bluePrints.add(new BluePrint("./assets/base.png", 1, "House"));
+    bluePrints.add(new BluePrint("./assets/base.png", 2, "School"));
+    bluePrints.add(new BluePrint("./assets/base.png", 3, "University"));
+    bluePrints.add(new BluePrint("./assets/base.png", 4, "Drug Den"));
 
     drawBackground();
+    img = loadImage("./assets/base.png");
 }
 
 void draw() {
     // background(200);
     // drawBackground();
 
-    // if(buildings.size() == 0) return;
-    // for(BluePrint b : bluePrints) {
-    //     b.draw();
-    // }
+    if(currentBuildings.size() == 0) return;
+    for(BluePrint b : bluePrints) {
+        b.draw();
+    }
 
-    // for(Building b : currentBuildings) {
-    //     b.draw();
-    // }
+    for(Building b : currentBuildings) {
+        b.draw();
+    }
 
     // draw stats
 
@@ -140,24 +151,26 @@ void mouseClicked() {
     final int Y1 = TOP_HEIGHT;
     final int Y2 = TOP_HEIGHT + GRID_SIZE;
 
-    // if (mouseX < SIDE_WIDTH) {
-    //     //in options column
-    //     if(currentPosition.x > 50 && currentPosition.x < 50 + CELL_SIZE){
 
-    //         float index = (currentPosition.y-50)/(10+ CELL_SIZE);
-    //         if(index >= 0 && index < bluePrints.size()){
-    //             selectedBlueprint = (int)index;
-    //         }
-    //     }
 
-    //     // if clicked button
-    //     if(currentPosition.y > height - 60){
-    //             // delete
-    //             selectedBlueprint = -1;
-    //     }
+    if (MOUSE.x < SIDE_WIDTH) {
+        //in options column
+        if(MOUSE.x > 50 && MOUSE.x < 50 + CELL_SIZE){
 
-    //     return;
-    // }
+            float index = (MOUSE.y-50)/(10+ CELL_SIZE);
+            if(index >= 0 && index < bluePrints.size()){
+                selectedBlueprint = (int)index;
+            }
+        }
+
+        // if clicked button
+        if(MOUSE.y > height - 60){
+                // delete
+                selectedBlueprint = -1;
+        }
+
+        return;
+    }
 
 
 
@@ -189,52 +202,37 @@ void mouseClicked() {
     }
 
 
+    // left corner of cell
+    PVector pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
 
-        // if(V5.y > currentPosition.y)
-        // continue;
+    // center of cell to the top left
+    pointA.y = pointA.y - CELL_SIZE/4;
 
-        // gridB = new PVector(gridA.x, gridA.y - CELL_SIZE/2);
-
-        // left corner of cell
-        PVector pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
-        // PVector pointB = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
-
-
-
-        fill(250, 0,0);
-        // circle(pointA.x, pointA.y, 10);
-        circle(pointA.x, pointA.y - CELL_SIZE/4, 10);
-        fill(250, 255,0);
-
-        circle(pointA.x + CELL_SIZE/2, pointA.y , 10);
-
-
-
-    // if(selectedBlueprint == -1) {
-    //     // delete building
-    //     for(Building b : currentBuildings) {
-    //         if(b.position.x == currentPosition.x && b.position.y == currentPosition.y) {
-    //             currentBuildings.remove(b);
-    //             score += 1;
-    //             return;
-    //         }
-    //     }
-    //     return;
-    // }
+    // find and delete building
+    if(selectedBlueprint == -1) {
+        for(Building b : currentBuildings) {
+            if(b.position.x == pointA.x && b.position.y == pointA.y) {
+                currentBuildings.remove(b);
+                score += 1;
+                return;
+            }
+        }
+        return;
+    }
 
 
 
-    // // add building if not already there
-    // boolean found = false;
-    // for(Building b : currentBuildings) {
-    //     if(b.position.x == currentPosition.x && b.position.y == currentPosition.y) {
-    //         found = true;
-    //         return;
-    //     }
-    // }
+    // add building if not already there
+    boolean found = false;
+    for(Building b : currentBuildings) {
+        if(b.position.x == pointA.x && b.position.y == pointA.y) {
+            found = true;
+            return;
+        }
+    }
 
 
-    // currentBuildings.add(new Building(selectedBlueprint, currentPosition));
+    currentBuildings.add(new Building(selectedBlueprint, pointA));
     currentBuildings.sort(null);
 }
 
