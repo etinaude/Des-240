@@ -73,11 +73,12 @@ void setup() {
     bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 3, "University"));
     bluePrints.add(new BluePrint(color(random(150), random(200), random(100, 255)) , 4, "Drug Den"));
 
+    drawBackground();
 }
 
 void draw() {
     // background(200);
-    drawBackground();
+    // drawBackground();
 
     // if(buildings.size() == 0) return;
     // for(BluePrint b : bluePrints) {
@@ -104,7 +105,7 @@ void draw() {
 }
 
 void drawBackground(){
-    background(200);
+    // background(200);
 
     strokeWeight(1);
     stroke(100);
@@ -133,53 +134,126 @@ void drawButtons(){
 
 
 void mouseClicked() {
-    PVector currentPosition = new PVector(mouseX, mouseY);
-    if (mouseX < SIDE_WIDTH) {
-        //in options column
-        if(currentPosition.x > 50 && currentPosition.x < 50 + CELL_SIZE){
+    final PVector MOUSE = new PVector(mouseX, mouseY);
+    final PVector V1 = new PVector(mouseX, mouseY + 1000);
+    final PVector V2 = new PVector(mouseX, 0);
+    final int Y1 = TOP_HEIGHT;
+    final int Y2 = TOP_HEIGHT + GRID_SIZE;
 
-            float index = (currentPosition.y-50)/(10+ CELL_SIZE);
-            if(index >= 0 && index < bluePrints.size()){
-                selectedBlueprint = (int)index;
-            }
+    // if (mouseX < SIDE_WIDTH) {
+    //     //in options column
+    //     if(currentPosition.x > 50 && currentPosition.x < 50 + CELL_SIZE){
+
+    //         float index = (currentPosition.y-50)/(10+ CELL_SIZE);
+    //         if(index >= 0 && index < bluePrints.size()){
+    //             selectedBlueprint = (int)index;
+    //         }
+    //     }
+
+    //     // if clicked button
+    //     if(currentPosition.y > height - 60){
+    //             // delete
+    //             selectedBlueprint = -1;
+    //     }
+
+    //     return;
+    // }
+
+
+
+
+    PVector[] gridLineB = new PVector[2];
+    PVector[] gridLineA = new PVector[2];
+
+
+    for(int i = 0; i < GRID_SIZE * 3 ; i += CELL_SIZE) {
+        final int X1 = SIDE_WIDTH - 2 * GRID_SIZE + i;
+        final int X2 = SIDE_WIDTH + i;
+
+        PVector lineA1 = new PVector(X2, Y1);
+        PVector lineA2 = new PVector(X1, Y2);
+
+        PVector lineB1 = new PVector(X1, Y1);
+        PVector lineB2 = new PVector(X2, Y2);
+
+        if(findIntersection(V1, V2, lineA1, lineA2).y < MOUSE.y){
+            gridLineA[0] = lineA1;
+            gridLineA[1] = lineA2;
+
         }
 
-        // if clicked button
-        if(currentPosition.y > height - 60){
-                // delete
-                selectedBlueprint = -1;
+        if(findIntersection(V1, V2, lineB2, lineB1).y > MOUSE.y){
+            gridLineB[0] = lineB1;
+            gridLineB[1] = lineB2;
         }
-
-        return;
     }
 
-    currentPosition.x = currentPosition.x -  currentPosition.x % CELL_SIZE;
-    currentPosition.y = currentPosition.y -  currentPosition.y % CELL_SIZE;
 
-    if(selectedBlueprint == -1) {
-        // delete building
-        for(Building b : currentBuildings) {
-            if(b.position.x == currentPosition.x && b.position.y == currentPosition.y) {
-                currentBuildings.remove(b);
-                score += 1;
-                return;
-            }
-        }
-        return;
-    }
+
+        // if(V5.y > currentPosition.y)
+        // continue;
+
+        // gridB = new PVector(gridA.x, gridA.y - CELL_SIZE/2);
+
+        // left corner of cell
+        PVector pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
+        // PVector pointB = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
 
 
 
-    // add building if not already there
-    boolean found = false;
-    for(Building b : currentBuildings) {
-        if(b.position.x == currentPosition.x && b.position.y == currentPosition.y) {
-            found = true;
-            return;
-        }
-    }
+        fill(250, 0,0);
+        // circle(pointA.x, pointA.y, 10);
+        circle(pointA.x, pointA.y - CELL_SIZE/4, 10);
+        fill(250, 255,0);
+
+        circle(pointA.x + CELL_SIZE/2, pointA.y , 10);
 
 
-    currentBuildings.add(new Building(selectedBlueprint, currentPosition));
+
+    // if(selectedBlueprint == -1) {
+    //     // delete building
+    //     for(Building b : currentBuildings) {
+    //         if(b.position.x == currentPosition.x && b.position.y == currentPosition.y) {
+    //             currentBuildings.remove(b);
+    //             score += 1;
+    //             return;
+    //         }
+    //     }
+    //     return;
+    // }
+
+
+
+    // // add building if not already there
+    // boolean found = false;
+    // for(Building b : currentBuildings) {
+    //     if(b.position.x == currentPosition.x && b.position.y == currentPosition.y) {
+    //         found = true;
+    //         return;
+    //     }
+    // }
+
+
+    // currentBuildings.add(new Building(selectedBlueprint, currentPosition));
     currentBuildings.sort(null);
+}
+
+
+PVector findIntersection(PVector p1, PVector p2, PVector p3, PVector p4) {
+    float x1 = p1.x;
+    float y1 = p1.y;
+    float x2 = p2.x;
+    float y2 = p2.y;
+    float x3 = p3.x;
+    float y3 = p3.y;
+    float x4 = p4.x;
+    float y4 = p4.y;
+
+    float d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+    if (d == 0) return null;  // parallel
+
+    float xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
+    float yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
+
+    return new PVector(xi, yi);
 }
