@@ -1,47 +1,28 @@
-PVector[] particles =  new PVector[10];
+int x = 15;
 
 void setup() {
-  size(500, 500);
-  createDots();
+  size(400, 400);
+  frameRate(3);
+  stroke(100);
+  strokeWeight(2);
 }
 
 void draw() {
+  background(255);
+    fill(random(255));
+    circle(x, 200, 30);
 
-  // reset the page
-  background(220);
+    fill(random(255));
+    circle(x+30, 200, 30);
 
-  // stores the mouse position
-  PVector mousePos = new PVector(mouseX, mouseY);
+    fill(random(255));
+    circle(x+60, 200, 30);
 
-  // loops through each circles position
-  for (PVector currentPos : particles) {
+    fill(random(255));
+    circle(x+90, 200, 30);
 
-    // half of the diamater of each circle so 50+12.5
-    // if the muse is close enough
-    if(PVector.dist(mousePos, currentPos) < 65.5){
-      fill(255, 0, 0);
-      stroke(255, 0, 0);
-    } else {
-      fill(0);
-      stroke(0);
+    x+= 70;
+    if(x > 350) {
+      x = 15;
     }
-    circle(currentPos.x, currentPos.y, 25);
-  }
-
-  // draw mouse cirlce
-  stroke(150);
-  strokeWeight(1);
-  noFill();
-  circle(mousePos.x, mousePos.y, 100);
-}
-
-void mouseClicked() {
-  createDots();
-}
-
-// add new dots in random positions to the array
-void createDots(){
-  for(int i = 0;  i < particles.length; i++){
-    particles[i] = new PVector(random(500), random(500));
-  }
 }
