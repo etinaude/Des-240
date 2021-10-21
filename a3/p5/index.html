@@ -10,25 +10,46 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
+
 
 
 </head>
 
 <body>
 
-    <a class="waves-effect waves-light btn-large delete" onclick="deleteBuilding()">Delete</a>
+    <div class="title">
 
-    <div class="stats">
-        <div id="score"></div>
-        <div id="total"></div>
-        <div id="selected"></div>
+        <h1>Fertility Rate</h1>
+
     </div>
 
-    <div id="blueprints">
+
+    <div class="BP-container">
         <h3>
             Blue Prints
         </h3>
-
+        <div id="blueprints">
+        </div>
     </div>
+
+
+    <div class="info">
+
+        <table class="charts-css line hide-data" id="chart">
+            <tbody id="chart-inner"></tbody>
+        </table>
+
+        <div class="stats">
+            <div class="smol">Score:</div>
+            <div id="score"></div>
+            <div class="smol">Total Buildings:</div>
+            <div id="total"></div>
+            <div class="smol">Selected Building:</div>
+            <div id="selected"></div>
+        </div>
+    </div>
+
+    <a class="waves-effect waves-light btn-large delete accent-2" onclick="deleteBuilding()">Delete</a>
 
 </body>

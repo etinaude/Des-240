@@ -1,41 +1,52 @@
 let bluePrints = [];
 let currentBuildings = [];
 
-const CELL_SIZE = 150;
+const CELL_SIZE = 200;
 
-let selectedBlueprint = -1;
+let blueprintIndex = -1;
 let score = 0;
 
 class BluePrint {
     optionIndex;
     img;
     src;
-    constructor(img, optionIndex, name) {
+    scoreArray = [];
+    count;
+
+    constructor(img, optionIndex, name, scoreArray) {
         this.img = loadImage(img);
         this.optionIndex = optionIndex;
         this.name = name;
         this.src = img;
+        this.scoreArray = scoreArray;
+        this.count = 0;
     }
 
     draw() {
         image(this.img, 50, 50 + (10 + CELL_SIZE) * this.optionIndex, CELL_SIZE, CELL_SIZE / 2);
     }
+
+    getScore(index) {
+        if (index > this.scoreArray.length) {
+            return this.scoreArray[this.scoreArray.length - 1];
+        }
+        return this.scoreArray[index - 1];
+
+    }
+
 }
 
 class Building {
     position;
     optionIndex;
 
-
-    constructor(optionIndex, position) {
+    constructor(optionIndex, position,) {
         this.position = position;
         this.optionIndex = round(optionIndex);
     }
 
     draw() {
-        print(this.optionIndex)
         image(bluePrints[this.optionIndex].img, this.position.x, this.position.y, CELL_SIZE, CELL_SIZE / 2);
-        print("DRAW BUILDING \n");
     }
 
 }
@@ -43,11 +54,12 @@ class Building {
 function setup() {
     createCanvas(800, 800);
     frameRate(20);
-    bluePrints.push(new BluePrint("../assets/base.png", 0, "Hospital"));
-    bluePrints.push(new BluePrint("../assets/base.png", 1, "House"));
-    bluePrints.push(new BluePrint("../assets/base.png", 2, "School"));
-    bluePrints.push(new BluePrint("../assets/base.png", 3, "University"));
-    bluePrints.push(new BluePrint("../assets/base.png", 4, "Drug Den"));
+    bluePrints.push(new BluePrint("../assets/base.png", 0, "Hospital", [3, 1, 0.5, 0.2, 0.2, 0.2, 0.1]));
+    bluePrints.push(new BluePrint("../assets/base.png", 1, "House", [0.15]));
+    bluePrints.push(new BluePrint("../assets/base.png", 2, "School", [2, 1, 1, 0.5, 0.4, 0.2, 0.1]));
+    bluePrints.push(new BluePrint("../assets/base.png", 3, "Workplace", [2, 2, 1, 1, 0.5, 0.5]));
+    bluePrints.push(new BluePrint("../assets/base.png", 4, "University", [3, 0.5, 0.1, 0.05,]));
+    bluePrints.push(new BluePrint("../assets/base.png", 5, "Drug Den", [-2, -1, -0.5]))
     drawBlueprints();
 
     refreshGrid();
@@ -55,12 +67,12 @@ function setup() {
 
 function drawBlueprints() {
     let container = document.getElementById("blueprints");
-    container.innerHTML = "<h3>Blue Prints</h3>";
 
+    container.innerHTML = "";
     bluePrints.forEach(b => {
         let img = document.createElement("img");
         img.src = b.src;
-        img.width = CELL_SIZE;
+        img.width = CELL_SIZE * 0.8;
 
         let imgContainer = document.createElement("div");
         imgContainer.className = "imgContainer";
@@ -71,7 +83,7 @@ function drawBlueprints() {
 
 
         let div = document.createElement("div");
-        if (selectedBlueprint == b.optionIndex) {
+        if (blueprintIndex == b.optionIndex) {
             div.className = "selected blueprint";
         } else {
             div.className = "blueprint";
@@ -88,12 +100,24 @@ function drawBlueprints() {
 
 }
 
+function updateGraph(previous, current, colour = "orange") {
+    print(previous, current);
+    if (!previous || !current || selectBluePrint == -1 || current == previous) {
+        return
+    }
+    element = document.getElementById("chart-inner");
+    element.innerHTML += `
+    <tr>
+    <td style="--start: ${previous / 20}; --size: ${current / 20}; --color: ${colour}"></td>
+    </tr>`
+}
 
 function refreshGrid() {
     strokeWeight(1);
     stroke(100);
     background(255);
     drawBlueprints();
+    updateGraph()
 
 
     const y1 = 0;
@@ -116,27 +140,65 @@ function refreshGrid() {
 
 
 function drawStats() {
-    document.getElementById("score").innerHTML = "Score: " + score;
-    document.getElementById("total").innerHTML = "Buildings: " + currentBuildings.length;
+    getScore();
+    document.getElementById("score").innerHTML = score;
+    document.getElementById("total").innerHTML = currentBuildings.length;
 
-    if (selectedBlueprint > 0) {
-        document.getElementById("selected").innerHTML = "selected: " + bluePrints[selectedBlueprint].name;
+    if (blueprintIndex > 0) {
+        document.getElementById("selected").innerHTML = bluePrints[blueprintIndex].name;
+    } else {
+        document.getElementById("selected").innerHTML = "None";
     }
 }
 
-function selectBluePrint(id) { selectedBlueprint = id; }
+function getScore() {
+    const previousScore = score;
+    // default fertility rate is 20BPW
+    score = 20
+    var blueprintDict = {}
+    currentBuildings.forEach(b => {
+        if (blueprintDict[b.optionIndex] == undefined) {
+            blueprintDict[b.optionIndex] = 0;
+        }
+        blueprintDict[b.optionIndex]++;
+        score -= bluePrints[b.optionIndex].getScore(blueprintDict[b.optionIndex])
+    })
 
-function deleteBuilding() {
-    selectedBlueprint = -1;
+    if (score < 0) {
+        score = 0;
+    }
+
+    if (score > 20) {
+        score = 20;
+    }
+
+    score = Math.round(score * 100) / 100;
+
+    if (score <= 3 && score >= 1.5) {
+        updateGraph(previousScore, score, "green");
+    } else if (score > 3 && score < 5) {
+        updateGraph(previousScore, score, "yellow");
+    } else if (score < 1.5 && score > 1) {
+        updateGraph(previousScore, score, "yellow");
+    } else {
+        updateGraph(previousScore, score, "red");
+    }
+
 }
 
+function selectBluePrint(id) { blueprintIndex = id; refreshGrid() }
 
+function deleteBuilding() {
+    blueprintIndex = -1;
+}
 
 function mouseClicked() {
     let cell = findCell();
+    if (cell == null) return;
+
 
     // find and delete building
-    if (selectedBlueprint == -1) {
+    if (blueprintIndex == -1) {
         currentBuildings = currentBuildings.filter(b => {
             score += 1;
             return !(b.position.x == cell.x && b.position.y == cell.y);
@@ -147,15 +209,17 @@ function mouseClicked() {
 
     // add building if not already there
     let found = false;
+
     currentBuildings.forEach(b => {
         if (b.position.x == cell.x && b.position.y == cell.y) {
             found = true;
             return
         }
     })
-
+    var selectedBluePrint = bluePrints[blueprintIndex]
     if (!found) {
-        currentBuildings.push(new Building(selectedBlueprint, cell));
+        selectedBluePrint.count++;
+        currentBuildings.push(new Building(blueprintIndex, cell));
         refreshGrid();
     }
 }
@@ -192,15 +256,26 @@ function findCell() {
         }
     }
 
+
+
     // left corner of cell
     // using the intersection of the grid lines
-    let pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
-    // center of cell to the top left
-    pointA.y = pointA.y - CELL_SIZE / 4;
+    try {
+        let pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
+        // center of cell to the top left
+        pointA.y = pointA.y - CELL_SIZE / 4;
 
-    return pointA;
+        if (pointA.x < 0 || pointA.y < 0) return null;
+        if (pointA.x + (CELL_SIZE / 2) >= width || pointA.y + (CELL_SIZE / 4) >= width) return null;
+        return pointA;
+
+    }
+    catch (e) {
+        return null;
+    }
+
+
 }
-
 
 function findIntersection(p1, p2, p3, p4) {
     if (p1 == undefined || p2 == undefined || p3 == undefined || p4 == undefined) return
