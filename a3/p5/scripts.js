@@ -5,7 +5,9 @@ const CELL_SIZE = 200;
 
 let blueprintIndex = -1;
 let score = 0;
+let lockBuilding = false;
 
+let lastReset = Date.now();
 let lastRefresh = Date.now()
 
 class BluePrint {
@@ -41,10 +43,12 @@ class BluePrint {
 class Building {
     position;
     optionIndex;
+    locked;
 
-    constructor(optionIndex, position,) {
+    constructor(optionIndex, position, locked = false) {
         this.position = position;
         this.optionIndex = round(optionIndex);
+        this.locked = locked;
     }
 
     draw() {
@@ -62,13 +66,12 @@ function setup() {
     bluePrints.push(new BluePrint("../assets/base.png", 3, "Workplace", [2, 2, 1, 1, 1, 0.5, 0.5]));
     bluePrints.push(new BluePrint("../assets/base.png", 4, "University", [3, 0.5, 0.1, 0.05,]));
     bluePrints.push(new BluePrint("../assets/base.png", 5, "Drug Den", [-2, -1, -0.5]))
-    drawBlueprints();
 
-    refreshGrid();
+    reset();
 }
 
 function draw() {
-    if (Date.now() - lastRefresh > 1000 * 20) {
+    if (Date.now() - lastRefresh > 1000 && lastRefresh != lastReset) {
         reset();
     }
 }
@@ -81,10 +84,29 @@ function reset() {
     bluePrints.forEach(b => {
         b.count = 0;
     })
-
     refreshGrid();
     drawBlueprints();
+
+
+    document.getElementById("chart-inner").innerHTML = "";
     document.getElementById("modal").classList.remove("Hidden");
+
+    const time = Date.now();
+
+    lastReset = time;
+    lastRefresh = time;
+}
+
+function placeInitial() {
+    let x = 0;
+    let y = 0;
+    selectBluePrint(1);
+    for (let i = 0; i < 50; i++) {
+        x = random(0, 800)
+        y = random(0, 800)
+        handleClicks(x, y);
+    }
+    refreshGrid();
 }
 
 function drawBlueprints() {
@@ -136,22 +158,20 @@ function drawBlueprints() {
 }
 
 function updateGraph(previous, current, colour = "orange") {
-    if (!previous || !current || selectBluePrint == -1 || current == previous) {
-        return
+    if (current == previous) {
+        return;
     }
+
     let table = document.getElementById("chart-inner");
     table.innerHTML += `
     <tr>
     <td style="--start: ${previous / 20}; --size: ${current / 20}; --color: ${colour}"></td>
     </tr>`
 
-    let bar = document.getElementById("bar-inner")
+    let bar = document.getElementById("marker")
 
     let barWidth = Math.sqrt(current / 0.002)
-    console.log(current, "|", barWidth)
-
-    bar.style.width = `${barWidth}%`;
-    bar.style.backgroundColor = colour;
+    bar.style.marginLeft = `${barWidth}%`;
 }
 
 function refreshGrid() {
@@ -159,7 +179,7 @@ function refreshGrid() {
     stroke(100);
     background(255);
     drawBlueprints();
-    updateGraph();
+    // updateGraph();
     lastRefresh = Date.now();
 
 
@@ -181,7 +201,6 @@ function refreshGrid() {
 
     drawStats();
 }
-
 
 function drawStats() {
     getScore();
@@ -238,15 +257,17 @@ function deleteBuilding() {
     blueprintIndex = -1;
 }
 
-function mouseClicked() {
-    let cell = findCell();
+function handleClicks(x, y) {
+    const V1 = new createVector(x, y + 1000);
+    const V2 = new createVector(x, 0);
+
+    let cell = findCell(V1, V2, y);
     if (cell == null) return;
 
 
     // find and delete building
     if (blueprintIndex == -1) {
         currentBuildings = currentBuildings.filter(b => {
-            score += 1;
             return !(b.position.x == cell.x && b.position.y == cell.y);
         })
         refreshGrid();
@@ -270,9 +291,12 @@ function mouseClicked() {
     }
 }
 
-function findCell() {
-    const V1 = new createVector(mouseX, mouseY + 1000);
-    const V2 = new createVector(mouseX, 0);
+function mouseClicked() {
+    handleClicks(mouseX, mouseY);
+}
+
+function findCell(V1, V2, Y) {
+
 
     let gridLineB = [];
     let gridLineA = [];
@@ -290,19 +314,17 @@ function findCell() {
         let lineB2 = new createVector(X2, width);
 
         // find last line above cell
-        if (findIntersection(V1, V2, lineA1, lineA2).y < mouseY) {
+        if (findIntersection(V1, V2, lineA1, lineA2).y < Y) {
             gridLineA[0] = lineA1;
             gridLineA[1] = lineA2;
         }
 
         // find last line below cell
-        if (findIntersection(V1, V2, lineB2, lineB1).y > mouseY) {
+        if (findIntersection(V1, V2, lineB2, lineB1).y > Y) {
             gridLineB[0] = lineB1;
             gridLineB[1] = lineB2;
         }
     }
-
-
 
     // left corner of cell
     // using the intersection of the grid lines
@@ -316,10 +338,9 @@ function findCell() {
         return pointA;
 
     } catch (e) {
+        console.log(e);
         return null;
     }
-
-
 }
 
 function findIntersection(p1, p2, p3, p4) {
@@ -335,7 +356,6 @@ function findIntersection(p1, p2, p3, p4) {
 
 function done() {
     document.getElementById("modal").classList.add("Hidden");
+    placeInitial();
     lastRefresh = Date.now()
 }
-
-reset();

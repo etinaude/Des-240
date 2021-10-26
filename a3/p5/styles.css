@@ -159,7 +159,7 @@ body {
   width: 100%;
   height: 20px;
   border-radius: 10px;
-  background-color: #ddd;
+  /* background-color: #ddd; */
   position: relative;
 }
 
@@ -173,7 +173,16 @@ body {
     background-color 0.2s cubic-bezier(0.13, -0.39, 0.82, 1.32);
 }
 
-.bar > .goal-bar {
+.bar-container > #marker {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+
+  border-top: 10px solid #f00;
+}
+
+.bar-container > .goal-bar {
   background: linear-gradient(
     0.25turn,
     #ffb1b1 20% 27%,
@@ -251,10 +260,10 @@ body {
 /*#endregion*/
 
 /* TODO REMOVE THIS!!! */
-#modal {
+/* #modal {
   display: none;
-}
+} */
 
-.stats {
+/* .stats {
   display: none;
-}
+} */
