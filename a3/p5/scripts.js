@@ -1,7 +1,7 @@
 let bluePrints = [];
 let currentBuildings = [];
 
-const CELL_SIZE = 200;
+const CELL_SIZE = 250;
 
 let blueprintIndex = -1;
 let score = 0;
@@ -58,15 +58,15 @@ class Building {
 }
 
 function setup() {
-    createCanvas(800, 800);
+    createCanvas(750, 750);
+    smooth();
     frameRate(20);
-    bluePrints.push(new BluePrint("../assets/base.png", 0, "Hospital", [3, 1, 0.5, 0.2, 0.2, 0.2, 0.1]));
-    bluePrints.push(new BluePrint("../assets/base.png", 1, "House", [0.15]));
-    bluePrints.push(new BluePrint("../assets/base.png", 2, "School", [2, 1, 1, 0.5, 0.4, 0.2, 0.1]));
-    bluePrints.push(new BluePrint("../assets/base.png", 3, "Workplace", [2, 2, 1, 1, 1, 0.5, 0.5]));
-    bluePrints.push(new BluePrint("../assets/base.png", 4, "University", [3, 0.5, 0.1, 0.05,]));
-    bluePrints.push(new BluePrint("../assets/base.png", 5, "Drug Den", [-2, -1, -0.5]))
-
+    bluePrints.push(new BluePrint("./assets/hospital.png", 0, "Hospital", [3, 1, 0.5, 0.2, 0.2, 0.2, 0.1]));
+    bluePrints.push(new BluePrint("./assets/house.png", 1, "House", [0.15]));
+    bluePrints.push(new BluePrint("./assets/school.png", 2, "School", [2, 1, 1, 0.5, 0.4, 0.2, 0.1]));
+    bluePrints.push(new BluePrint("./assets/work.png", 3, "Workplace", [2, 2, 1, 1, 1, 0.5, 0.5]));
+    bluePrints.push(new BluePrint("./assets/uni.png", 4, "University", [3, 0.5, 0.1, 0.05,]));
+    bluePrints.push(new BluePrint("./assets/drug_den.png", 5, "Drug Den", [-2, -1, -0.5]));
     reset();
 }
 
@@ -104,7 +104,7 @@ function placeInitial() {
 
 
     lockBuilding = true;
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 30; i++) {
         x = random(0, 800)
         y = random(0, 800)
         handleClicks(x, y);
@@ -183,7 +183,7 @@ function updateGraph(previous, current, colour = "orange") {
 
 function refreshGrid() {
     strokeWeight(1);
-    stroke(100);
+    stroke(150);
     background(255);
     drawBlueprints();
     // updateGraph();
