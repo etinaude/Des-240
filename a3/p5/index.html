@@ -11,19 +11,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
-
-
-
 </head>
 
 <body>
-
     <div class="title">
-
         <h1>Fertility Rate</h1>
-
     </div>
-
 
     <div class="BP-container">
         <h3>
@@ -33,7 +26,6 @@
         </div>
     </div>
 
-
     <div class="info">
 
         <table class="charts-css line hide-data" id="chart">
@@ -41,15 +33,46 @@
         </table>
 
         <div class="stats">
-            <div class="smol">Score:</div>
+            <div class="smol">Fertility:</div>
             <div id="score"></div>
             <div class="smol">Total Buildings:</div>
             <div id="total"></div>
             <div class="smol">Selected Building:</div>
             <div id="selected"></div>
         </div>
+
+        <div class="bar">
+            <p> Aim </p>
+            <div class="bar-container">
+                <div class="bar-inner" id='bar-inner'></div>
+            </div>
+            <div class="goal-bar"></div>
+
+        </div>
     </div>
 
-    <a class="waves-effect waves-light btn-large delete accent-2" onclick="deleteBuilding()">Delete</a>
+    <div class="buttons">
+        <a class="waves-effect waves-light btn-large delete " onclick="deleteBuilding()">Delete</a>
+        <a class="waves-effect waves-light btn-large delete " onclick="reset()">Reset</a>
+    </div>
+
+    <div class="modal-container" id="modal">
+        <div class="modal">
+            <div class="modal-content">
+                <h4>Your Goal</h4>
+                <p>
+                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquid fuga fugit non sint itaque
+                    repellendus
+                    placeat optio, numquam magnam illum iste qui vero officiis temporibus aperiam! Nesciunt minima sequi
+                    sit. Totam nemo explicabo earum culpa optio. Consequatur quod ipsa corrupti pariatur veniam vel
+                    cumque
+                    iusto, est in, odit incidunt id.
+                </p>
+            </div>
+            <div class="footer">
+                <a href="#!" class="waves-effect waves-light btn" onclick="done()">Done</a>
+            </div>
+        </div>
+    </div>
 
 </body>

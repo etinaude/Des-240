@@ -6,6 +6,8 @@ const CELL_SIZE = 200;
 let blueprintIndex = -1;
 let score = 0;
 
+let lastRefresh = Date.now()
+
 class BluePrint {
     optionIndex;
     img;
@@ -57,7 +59,7 @@ function setup() {
     bluePrints.push(new BluePrint("../assets/base.png", 0, "Hospital", [3, 1, 0.5, 0.2, 0.2, 0.2, 0.1]));
     bluePrints.push(new BluePrint("../assets/base.png", 1, "House", [0.15]));
     bluePrints.push(new BluePrint("../assets/base.png", 2, "School", [2, 1, 1, 0.5, 0.4, 0.2, 0.1]));
-    bluePrints.push(new BluePrint("../assets/base.png", 3, "Workplace", [2, 2, 1, 1, 0.5, 0.5]));
+    bluePrints.push(new BluePrint("../assets/base.png", 3, "Workplace", [2, 2, 1, 1, 1, 0.5, 0.5]));
     bluePrints.push(new BluePrint("../assets/base.png", 4, "University", [3, 0.5, 0.1, 0.05,]));
     bluePrints.push(new BluePrint("../assets/base.png", 5, "Drug Den", [-2, -1, -0.5]))
     drawBlueprints();
@@ -65,8 +67,32 @@ function setup() {
     refreshGrid();
 }
 
+function draw() {
+    if (Date.now() - lastRefresh > 1000 * 20) {
+        reset();
+    }
+}
+
+function reset() {
+    blueprintIndex = -1;
+    currentBuildings = [];
+    score = 20;
+
+    bluePrints.forEach(b => {
+        b.count = 0;
+    })
+
+    refreshGrid();
+    drawBlueprints();
+    document.getElementById("modal").classList.remove("Hidden");
+}
+
 function drawBlueprints() {
     let container = document.getElementById("blueprints");
+
+    let item = document.createElement("div");
+    item.classList.add("blueprints");
+
 
     container.innerHTML = "";
     bluePrints.forEach(b => {
@@ -77,6 +103,12 @@ function drawBlueprints() {
         let imgContainer = document.createElement("div");
         imgContainer.className = "imgContainer";
         imgContainer.appendChild(img);
+
+
+        let count = document.createElement("div");
+        count.className = "count-container";
+        count.innerText = b.count;
+
 
         let name = document.createElement("h4");
         name.innerHTML = b.name;
@@ -94,22 +126,32 @@ function drawBlueprints() {
             selectBluePrint(b.optionIndex);
         }
         div.appendChild(imgContainer);
+        div.appendChild(count);
         div.appendChild(name);
-        container.appendChild(div);
+        item.appendChild(div);
     })
+
+    container.appendChild(item);
 
 }
 
 function updateGraph(previous, current, colour = "orange") {
-    print(previous, current);
     if (!previous || !current || selectBluePrint == -1 || current == previous) {
         return
     }
-    element = document.getElementById("chart-inner");
-    element.innerHTML += `
+    let table = document.getElementById("chart-inner");
+    table.innerHTML += `
     <tr>
     <td style="--start: ${previous / 20}; --size: ${current / 20}; --color: ${colour}"></td>
     </tr>`
+
+    let bar = document.getElementById("bar-inner")
+
+    let barWidth = Math.sqrt(current / 0.002)
+    console.log(current, "|", barWidth)
+
+    bar.style.width = `${barWidth}%`;
+    bar.style.backgroundColor = colour;
 }
 
 function refreshGrid() {
@@ -117,14 +159,16 @@ function refreshGrid() {
     stroke(100);
     background(255);
     drawBlueprints();
-    updateGraph()
+    updateGraph();
+    lastRefresh = Date.now();
+
 
 
     const y1 = 0;
     const y2 = width;
 
     for (let i = 0; i < width * 3; i += CELL_SIZE) {
-        const x1 = - 2 * width + i;
+        const x1 = -2 * width + i;
         const x2 = i;
         line(x1, y1, x2, y2);
         line(x2, y1, x1, y2);
@@ -183,10 +227,12 @@ function getScore() {
     } else {
         updateGraph(previousScore, score, "red");
     }
-
 }
 
-function selectBluePrint(id) { blueprintIndex = id; refreshGrid() }
+function selectBluePrint(id) {
+    blueprintIndex = id;
+    refreshGrid()
+}
 
 function deleteBuilding() {
     blueprintIndex = -1;
@@ -232,7 +278,7 @@ function findCell() {
     let gridLineA = [];
 
     for (let i = 0; i < width * 3; i += CELL_SIZE) {
-        const X1 = - 2 * width + i;
+        const X1 = -2 * width + i;
         const X2 = i;
 
         // increasing lines
@@ -269,8 +315,7 @@ function findCell() {
         if (pointA.x + (CELL_SIZE / 2) >= width || pointA.y + (CELL_SIZE / 4) >= width) return null;
         return pointA;
 
-    }
-    catch (e) {
+    } catch (e) {
         return null;
     }
 
@@ -287,3 +332,10 @@ function findIntersection(p1, p2, p3, p4) {
 
     return new createVector(xi, yi);
 }
+
+function done() {
+    document.getElementById("modal").classList.add("Hidden");
+    lastRefresh = Date.now()
+}
+
+reset();
