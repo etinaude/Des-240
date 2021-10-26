@@ -163,23 +163,13 @@ body {
   position: relative;
 }
 
-.bar > .bar-container > .bar-inner {
-  width: 100%;
-  height: 20px;
-  border-radius: 10px;
-  background-color: red;
-
-  transition: width 1s cubic-bezier(0.13, -0.39, 0.82, 1.32),
-    background-color 0.2s cubic-bezier(0.13, -0.39, 0.82, 1.32);
-}
-
 .bar-container > #marker {
   width: 0;
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
 
-  border-top: 10px solid #f00;
+  border-top: 10px solid #22968a;
 }
 
 .bar-container > .goal-bar {

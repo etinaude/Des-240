@@ -101,11 +101,18 @@ function placeInitial() {
     let x = 0;
     let y = 0;
     selectBluePrint(1);
+
+
+    lockBuilding = true;
     for (let i = 0; i < 50; i++) {
         x = random(0, 800)
         y = random(0, 800)
         handleClicks(x, y);
     }
+    lockBuilding = false;
+    selectBluePrint(-1)
+
+
     refreshGrid();
 }
 
@@ -268,6 +275,7 @@ function handleClicks(x, y) {
     // find and delete building
     if (blueprintIndex == -1) {
         currentBuildings = currentBuildings.filter(b => {
+            if (b.locked) return true;
             return !(b.position.x == cell.x && b.position.y == cell.y);
         })
         refreshGrid();
@@ -286,7 +294,7 @@ function handleClicks(x, y) {
     var selectedBluePrint = bluePrints[blueprintIndex]
     if (!found) {
         selectedBluePrint.count++;
-        currentBuildings.push(new Building(blueprintIndex, cell));
+        currentBuildings.push(new Building(blueprintIndex, cell, lockBuilding));
         refreshGrid();
     }
 }
@@ -296,8 +304,6 @@ function mouseClicked() {
 }
 
 function findCell(V1, V2, Y) {
-
-
     let gridLineB = [];
     let gridLineA = [];
 
