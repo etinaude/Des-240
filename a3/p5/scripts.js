@@ -71,7 +71,7 @@ function setup() {
 }
 
 function draw() {
-    if (Date.now() - lastRefresh > 1000 && lastRefresh != lastReset) {
+    if (Date.now() - lastRefresh > 1000 * 60 && lastRefresh != lastReset) {
         reset();
     }
 }
