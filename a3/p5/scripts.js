@@ -72,7 +72,6 @@ class Building {
 
 function setup() {
     createCanvas(CELL_SIZE * 3, CELL_SIZE * 3);
-    smooth();
     frameRate(30);
     bluePrints.push(
         new BluePrint(
