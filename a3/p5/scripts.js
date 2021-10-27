@@ -8,9 +8,9 @@ let score = 0;
 let lockBuilding = false;
 
 let lastReset = Date.now();
-let lastRefresh = Date.now()
+let lastRefresh = Date.now();
 
-let hoverCell = null;
+let previousCell = null;
 
 class BluePrint {
     optionIndex;
@@ -31,7 +31,13 @@ class BluePrint {
     }
 
     draw() {
-        image(this.img, 50, 50 + (10 + CELL_SIZE) * this.optionIndex, CELL_SIZE, CELL_SIZE / 2);
+        image(
+            this.img,
+            50,
+            50 + (10 + CELL_SIZE) * this.optionIndex,
+            CELL_SIZE,
+            CELL_SIZE / 2
+        );
     }
 
     getScore(index) {
@@ -39,9 +45,7 @@ class BluePrint {
             return this.scoreArray[this.scoreArray.length - 1];
         }
         return this.scoreArray[index - 1];
-
     }
-
 }
 
 class Building {
@@ -56,21 +60,51 @@ class Building {
     }
 
     draw() {
-        image(bluePrints[this.optionIndex].img, this.position.x, this.position.y, CELL_SIZE, CELL_SIZE / 2);
+        image(
+            bluePrints[this.optionIndex].img,
+            this.position.x,
+            this.position.y,
+            CELL_SIZE,
+            CELL_SIZE / 2
+        );
     }
-
 }
 
 function setup() {
     createCanvas(CELL_SIZE * 3, CELL_SIZE * 3);
     smooth();
     frameRate(30);
-    bluePrints.push(new BluePrint("./assets/hospital.png", 0, "Hospital", [3, 1, 0.5, 0.2, 0.2, 0.2, 0.1]));
-    bluePrints.push(new BluePrint("./assets/school.png", 1, "School", [2, 1, 1, 0.5, 0.4, 0.2, 0.1]));
-    bluePrints.push(new BluePrint("./assets/work.png", 2, "Workplace", [2, 2, 1, 1, 1, 0.5, 0.5]));
-    bluePrints.push(new BluePrint("./assets/uni.png", 3, "University", [3, 0.5, 0.1, 0.05,]));
+    bluePrints.push(
+        new BluePrint(
+            "./assets/hospital.png",
+            0,
+            "Hospital",
+            [3, 1, 0.5, 0.2, 0.2, 0.2, 0.1]
+        )
+    );
+    bluePrints.push(
+        new BluePrint(
+            "./assets/school.png",
+            1,
+            "School",
+            [2, 1, 1, 0.5, 0.4, 0.2, 0.1]
+        )
+    );
+    bluePrints.push(
+        new BluePrint(
+            "./assets/work.png",
+            2,
+            "Workplace",
+            [2, 2, 1, 1, 1, 0.5, 0.5]
+        )
+    );
+    bluePrints.push(
+        new BluePrint("./assets/uni.png", 3, "University", [3, 0.5, 0.1, 0.05])
+    );
 
-    bluePrints.push(new BluePrint("./assets/house.png", 4, "House", [0.15], true));
+    bluePrints.push(
+        new BluePrint("./assets/house.png", 4, "House", [0.15], true)
+    );
     bluePrints.push(new BluePrint("./assets/empty.png", 5, "Empty", [0], true));
 
     reset();
@@ -81,30 +115,48 @@ function draw() {
         reset();
     }
 
-    if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height && blueprintIndex != -1) {
-
+    if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
         const V1 = new createVector(mouseX, mouseY + 1000);
         const V2 = new createVector(mouseX, 0);
-
         try {
-            let currentCell = findCell(V1, V2, mouseY)
-            if (hoverCell == null) {
-                hoverCell = currentCell;
+            let currentCell = findCell(V1, V2, mouseY);
+            if (previousCell == null) {
+                previousCell = currentCell;
             }
 
-            if (currentCell != hoverCell) {
-                hoverCell = currentCell;
-                drawGrid();
+            // if nothing has changed (deep equality)
+            if (currentCell.x == previousCell.x && currentCell.y == previousCell.y) {
+                return;
             }
+
+            previousCell = currentCell;
+            drawGrid();
 
             tint(255, 200);
-            if (!isCellOccupied(currentCell)) {
-                image(bluePrints[blueprintIndex].img, currentCell.x, currentCell.y, CELL_SIZE, CELL_SIZE / 2);
+
+            const occupied = isCellOccupied(currentCell);
+
+            if (!occupied && blueprintIndex != -1) {
+                image(
+                    bluePrints[blueprintIndex].img,
+                    currentCell.x,
+                    currentCell.y,
+                    CELL_SIZE,
+                    CELL_SIZE / 2
+                );
+            } else if (occupied && blueprintIndex == -1) {
+                if (occupied.optionIndex != 4) {
+                    image(
+                        bluePrints[5].img,
+                        currentCell.x,
+                        currentCell.y,
+                        CELL_SIZE,
+                        CELL_SIZE / 2
+                    );
+                }
             }
             noTint();
-
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             noTint();
         }
@@ -116,12 +168,12 @@ function reset() {
     currentBuildings = [];
     score = 20;
 
-    bluePrints.forEach(b => {
+    bluePrints.forEach((b) => {
         b.count = 0;
-    })
+    });
     drawGrid();
     drawBlueprints();
-
+    placeInitial();
 
     document.getElementById("chart-inner").innerHTML = "";
     document.getElementById("modal").classList.remove("Hidden");
@@ -138,25 +190,22 @@ function placeInitial() {
 
     selectBluePrint(4);
     lockBuilding = true;
-    for (let i = 0; i < 30; i++) {
-        x = random(0, 800)
-        y = random(0, 800)
+    for (let i = 0; i < 20; i++) {
+        x = random(0, 800);
+        y = random(0, 800);
         handleClicks(x, y);
     }
 
     lockBuilding = false;
-    selectBluePrint(-1)
-
-
+    selectBluePrint(-1);
 
     drawGrid();
 }
 
-
 //#region [rgba(10, 10, 200, 0.1)] interaction
 function selectBluePrint(id) {
     blueprintIndex = id;
-    drawGrid()
+    drawGrid();
 
     elements = document.getElementsByClassName("blueprint");
 
@@ -174,13 +223,14 @@ function deleteBuilding() {
 }
 
 function mouseClicked() {
+    if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
     handleClicks(mouseX, mouseY);
 }
 
 function done() {
     document.getElementById("modal").classList.add("Hidden");
     placeInitial();
-    lastRefresh = Date.now()
+    lastRefresh = Date.now();
 }
 //#endregion
 
@@ -192,9 +242,8 @@ function drawBlueprints() {
     let item = document.createElement("div");
     item.classList.add("blueprints");
 
-
     container.innerHTML = "";
-    bluePrints.forEach(b => {
+    bluePrints.forEach((b) => {
         if (b.disable) return;
         let img = document.createElement("img");
         img.src = b.src;
@@ -204,15 +253,12 @@ function drawBlueprints() {
         imgContainer.className = "imgContainer";
         imgContainer.appendChild(img);
 
-
         let count = document.createElement("div");
         count.className = "count-container";
         count.innerText = b.count;
 
-
         let name = document.createElement("h4");
         name.innerHTML = b.name;
-
 
         let div = document.createElement("div");
         if (blueprintIndex == b.optionIndex) {
@@ -224,15 +270,14 @@ function drawBlueprints() {
         div.id = b.optionIndex;
         div.onclick = function () {
             selectBluePrint(b.optionIndex);
-        }
+        };
         div.appendChild(imgContainer);
         div.appendChild(count);
         div.appendChild(name);
         item.appendChild(div);
-    })
+    });
 
     container.appendChild(item);
-
 }
 
 function drawStats() {
@@ -241,7 +286,8 @@ function drawStats() {
     document.getElementById("total").innerHTML = currentBuildings.length;
 
     if (blueprintIndex > 0) {
-        document.getElementById("selected").innerHTML = bluePrints[blueprintIndex].name;
+        document.getElementById("selected").innerHTML =
+            bluePrints[blueprintIndex].name;
     } else {
         document.getElementById("selected").innerHTML = "None";
     }
@@ -253,8 +299,6 @@ function drawGrid() {
     background(255);
     lastRefresh = Date.now();
 
-
-
     const y1 = 0;
     const y2 = width;
 
@@ -264,7 +308,6 @@ function drawGrid() {
         line(x1, y1, x2, y2);
         line(x2, y1, x1, y2);
     }
-
 
     for (let x = -CELL_SIZE; x < CELL_SIZE * 3; x += CELL_SIZE) {
         for (let y = -CELL_SIZE / 4; y < CELL_SIZE * 3; y += CELL_SIZE / 2) {
@@ -278,10 +321,9 @@ function drawGrid() {
         }
     }
 
-
-    currentBuildings.forEach(b => {
+    currentBuildings.forEach((b) => {
         b.draw();
-    })
+    });
 
     drawStats();
 }
@@ -294,12 +336,13 @@ function drawGraph(previous, current, colour = "orange") {
     let table = document.getElementById("chart-inner");
     table.innerHTML += `
     <tr>
-    <td style="--start: ${previous / 20}; --size: ${current / 20}; --color: ${colour}"></td>
-    </tr>`
+    <td style="--start: ${previous / 25}; --size: ${current / 25
+        }; --color: ${colour}"></td>
+    </tr>`;
 
-    let bar = document.getElementById("marker")
+    let bar = document.getElementById("marker");
 
-    let barWidth = Math.sqrt(current / 0.002)
+    let barWidth = Math.sqrt(current / 0.002);
     bar.style.marginLeft = `${barWidth}%`;
 }
 
@@ -339,14 +382,19 @@ function findCell(V1, V2, Y) {
     // left corner of cell
     // using the intersection of the grid lines
     try {
-        let pointA = findIntersection(gridLineB[0], gridLineB[1], gridLineA[0], gridLineA[1]);
+        let pointA = findIntersection(
+            gridLineB[0],
+            gridLineB[1],
+            gridLineA[0],
+            gridLineA[1]
+        );
         // center of cell to the top left
         pointA.y = pointA.y - CELL_SIZE / 4;
 
         if (pointA.x < 0 || pointA.y < 0) return null;
-        if (pointA.x + (CELL_SIZE / 2) >= width || pointA.y + (CELL_SIZE / 4) >= width) return null;
+        if (pointA.x + CELL_SIZE / 2 >= width || pointA.y + CELL_SIZE / 4 >= width)
+            return null;
         return pointA;
-
     } catch (e) {
         console.log(e);
         return null;
@@ -354,12 +402,19 @@ function findCell(V1, V2, Y) {
 }
 
 function findIntersection(p1, p2, p3, p4) {
-    if (p1 == undefined || p2 == undefined || p3 == undefined || p4 == undefined) return
+    if (p1 == undefined || p2 == undefined || p3 == undefined || p4 == undefined)
+        return;
 
     const d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
 
-    let xi = ((p3.x - p4.x) * (p1.x * p2.y - p1.y * p2.x) - (p1.x - p2.x) * (p3.x * p4.y - p3.y * p4.x)) / d;
-    let yi = ((p3.y - p4.y) * (p1.x * p2.y - p1.y * p2.x) - (p1.y - p2.y) * (p3.x * p4.y - p3.y * p4.x)) / d;
+    let xi =
+        ((p3.x - p4.x) * (p1.x * p2.y - p1.y * p2.x) -
+            (p1.x - p2.x) * (p3.x * p4.y - p3.y * p4.x)) /
+        d;
+    let yi =
+        ((p3.y - p4.y) * (p1.x * p2.y - p1.y * p2.x) -
+            (p1.y - p2.y) * (p3.x * p4.y - p3.y * p4.x)) /
+        d;
 
     return new createVector(xi, yi);
 }
@@ -371,18 +426,17 @@ function handleClicks(x, y) {
     let cell = findCell(V1, V2, y);
     if (cell == null) return;
 
-
     // find and delete building
     if (blueprintIndex == -1) {
-        currentBuildings = currentBuildings.filter(b => {
+        currentBuildings = currentBuildings.filter((b) => {
             if (b.locked) return true;
             return !(b.position.x == cell.x && b.position.y == cell.y);
-        })
+        });
         drawGrid();
         return;
     }
 
-    var selectedBluePrint = bluePrints[blueprintIndex]
+    var selectedBluePrint = bluePrints[blueprintIndex];
     if (!isCellOccupied(cell)) {
         selectedBluePrint.count++;
         currentBuildings.push(new Building(blueprintIndex, cell, lockBuilding));
@@ -393,15 +447,25 @@ function handleClicks(x, y) {
 function getScore() {
     const previousScore = score;
     // default fertility rate is 20BPW
-    score = 20
-    var blueprintDict = {}
-    currentBuildings.forEach(b => {
+    score = 20;
+    var blueprintDict = {};
+    currentBuildings.forEach((b) => {
         if (blueprintDict[b.optionIndex] == undefined) {
             blueprintDict[b.optionIndex] = 0;
         }
         blueprintDict[b.optionIndex]++;
-        score -= bluePrints[b.optionIndex].getScore(blueprintDict[b.optionIndex])
-    })
+        score -= bluePrints[b.optionIndex].getScore(blueprintDict[b.optionIndex]);
+    });
+
+    // add count to blue prints
+    bluePrints.forEach((b) => {
+        b.count = blueprintDict[b.optionIndex] ? blueprintDict[b.optionIndex] : 0;
+
+        let element = document.getElementById(b.optionIndex);
+        if (element != null) {
+            element.getElementsByClassName("count-container")[0].innerHTML = b.count;
+        }
+    });
 
     if (score < 0) {
         score = 0;
@@ -425,15 +489,17 @@ function getScore() {
 }
 
 function isCellOccupied(cell) {
-
-    let found = false;
-    currentBuildings.forEach(b => {
-        if (b.position.x == cell.x && b.position.y == cell.y) {
-            found = true;
-            return
-        }
-    })
-
-    return found
+    try {
+        let foundBuilding = null;
+        currentBuildings.forEach((b) => {
+            if (b.position.x == cell.x && b.position.y == cell.y) {
+                foundBuilding = b;
+                return b;
+            }
+        });
+        return foundBuilding;
+    } catch {
+        return null;
+    }
 }
 //#endregion
