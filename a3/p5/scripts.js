@@ -96,8 +96,11 @@ function draw() {
                 hoverCell = currentCell;
                 drawGrid();
             }
+
             tint(255, 200);
-            image(bluePrints[blueprintIndex].img, currentCell.x, currentCell.y, CELL_SIZE, CELL_SIZE / 2);
+            if (!isCellOccupied(currentCell)) {
+                image(bluePrints[blueprintIndex].img, currentCell.x, currentCell.y, CELL_SIZE, CELL_SIZE / 2);
+            }
             noTint();
 
         }
@@ -379,23 +382,13 @@ function handleClicks(x, y) {
         return;
     }
 
-    // add building if not already there
-    let found = false;
-
-    currentBuildings.forEach(b => {
-        if (b.position.x == cell.x && b.position.y == cell.y) {
-            found = true;
-            return
-        }
-    })
     var selectedBluePrint = bluePrints[blueprintIndex]
-    if (!found) {
+    if (!isCellOccupied(cell)) {
         selectedBluePrint.count++;
         currentBuildings.push(new Building(blueprintIndex, cell, lockBuilding));
         drawGrid();
     }
 }
-
 
 function getScore() {
     const previousScore = score;
@@ -429,5 +422,18 @@ function getScore() {
     } else {
         drawGraph(previousScore, score, "red");
     }
+}
+
+function isCellOccupied(cell) {
+
+    let found = false;
+    currentBuildings.forEach(b => {
+        if (b.position.x == cell.x && b.position.y == cell.y) {
+            found = true;
+            return
+        }
+    })
+
+    return found
 }
 //#endregion
