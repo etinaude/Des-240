@@ -1,5 +1,19 @@
 # Fertility Rate
 
+## Tools Used
+
+<!-- TODO -->
+
+P5.js LINK
+CSS graph
+Material UI
+
+## Deployment
+
+<!-- TODO some crap about this -->
+
+[https://des-240.etinaude.dev/](https://des-240.etinaude.dev/)
+
 ## Running
 
 To run this code please open the `index.html` file in a web browser
@@ -12,4 +26,4 @@ The link to our documentation on miro is here:
 ## Contact
 
 Etienne Naude - Developer - etienne.etinaude.dev
-Silas Moore - Artist
+Silas Moore - Artist - smoo794@aucklanduni.ac.nz

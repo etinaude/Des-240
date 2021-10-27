@@ -62,10 +62,14 @@ body {
 .blueprint {
   background-color: #eee;
   border-radius: 10px;
-  padding: 10px;
+  padding: 40px;
   margin: 10px;
   box-shadow: 1px 1px 3px #ccc;
   position: relative;
+}
+
+.blueprint > h4 {
+  margin-bottom: 0;
 }
 
 .blueprint:hover {
