@@ -221,8 +221,8 @@ body {
 }
 
 .modal-container > .modal {
-  width: 50%;
-  height: 50%;
+  width: 40%;
+  height: 40%;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 1px 1px 3px #ccc;
@@ -253,11 +253,3 @@ body {
 }
 
 /*#endregion*/
-/* TODO REMOVE THIS!!! */
-/* #modal {
-  display: none;
-} */
-
-/* .stats {
-  display: none;
-} */
